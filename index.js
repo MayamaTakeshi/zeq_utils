@@ -74,12 +74,48 @@ async function start_mysql_server(z, server_host, server_port, name) {
     var conn_id = 0;
     server.on("connection", (conn) => {
         console.log("mysql connection request");
-        z.push_event({
-            event: "new_mysql_conn",
-            server: name,
-            conn,
-        });
         conn_id++;
+
+        conn.serverHandshake({
+            protocolVersion: 10,
+            serverVersion: "5.1.63-0ubuntu0.10.04.1-log",
+            connectionId: 1,
+            statusFlags: 2,
+            characterSet: 46,
+            //capabilityFlags: 0x81FFF7FF,
+            capabilityFlags: 0xffffff,
+            authCallback: () => {
+                // Without this, we will get 'Fatal Packets out of order exception'
+                // when we send replies to queries
+                // (see https://github.com/sidorares/node-mysql2/issues/1162)
+                conn.writeOk();
+                conn.sequenceId = 0;
+            },
+        });
+
+        conn.on("query", (query) => {
+            console.log("query", query);
+            z.push_event({
+                event: "mysql_query",
+                query: query,
+                conn,
+            });
+        });
+
+        conn.on("close", (query) => {
+            z.push_event({
+                event: "mysql_conn_close",
+                conn,
+            });
+        });
+
+        conn.on("error", (err) => {
+            z.push_event({
+                event: "mysql_conn_err",
+                conn,
+                err,
+            });
+        });
     });
     server.listen(server_port, server_host);
 
