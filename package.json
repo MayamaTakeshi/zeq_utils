@@ -34,6 +34,6 @@
     "@mayama/zeq": "^4.22.0",
     "ioredis": "^5.8.2",
     "nodemailer": "^7.0.10",
-    "nodemailer-smtp-transport": "^2.7.4"
+    "nodemailer-smtp-transport": "^2.4.2"
   }
 }
