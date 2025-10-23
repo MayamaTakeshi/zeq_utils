@@ -29,6 +29,7 @@
     "redis-proto": "^2.1.0"
   },
   "devDependencies": {
-    "@mayama/zeq": "^4.21.0"
+    "@mayama/zeq": "^4.21.0",
+    "ioredis": "^5.8.2"
   }
 }

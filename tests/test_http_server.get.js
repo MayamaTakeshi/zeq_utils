@@ -1,8 +1,8 @@
 const Zeq = require("@mayama/zeq");
 const m = require("data-matching");
 const assert = require("assert");
-const http = require("http");
 const zeq_utils = require('../index.js');
+
 const axios = require('axios');
 
 const z = new Zeq();
@@ -26,7 +26,7 @@ async function test() {
           'X-My-Header': 'abc',
         }
       },
-    )
+  )
     .then(res => {
       z.push_event({
           event: 'http_res',
