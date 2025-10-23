@@ -19,10 +19,14 @@ async function start_http_server(z, server_host, server_port, name, use_tls) {
     var proto = "http";
 
     if (use_tls) {
+        const keyPath = path.join(__dirname, "artifacts", "server.key");
+        const certPath = path.join(__dirname, "artifacts", "server.crt");
+
         options = {
-            key: fs.readFileSync("../artifacts/server.key"),
-            cert: fs.readFileSync("../artifacts/server.crt"),
-        };
+            key: fs.readFileSync(keyPath),
+            cert: fs.readFileSync(certPath),
+        }
+
         http_module = https;
         proto = "https";
     }
