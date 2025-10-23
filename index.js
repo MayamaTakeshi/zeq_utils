@@ -240,38 +240,34 @@ var send_redis_reply = (socket, reply) => {
 }
 
 async function wait_ioredis_connection_initialization(z, name) {
-  await z.wait([
-    {
-      name: 'redis_msg',
-      server: name,
-      msg: ['info'],
-      socket: m.collect('socket'),
-    },
-  ], 2000)
+  // not sure why, but sometimes 'info' comes before SETINFO and sometimes it comes after it.
 
-  send_redis_reply(z.store.socket, {"body":['# Server', 'redis_version:7.0.0', 'role:master', 'db0:keys=10,expires=0,avg_ttl=0']})
+  var pending = 3
 
-  await z.wait([
-    {
-      name: 'redis_msg',
-      server: name,
-      msg: ['client', 'SETINFO', 'LIB-NAME', 'ioredis'],
-      socket: m.collect('socket'),
-    },
-  ], 1000)
+  while (pending > 0) {
+    await z.wait([
+      {
+        name: 'redis_msg',
+        server: name,
+        msg: m.collect('msg'),
+        socket: m.collect('socket'),
+      },
+    ], 2000)
 
-  send_redis_reply(z.store.socket, '+OK\r\n')
+    if(_.isMatch(z.store.msg, ['info'])) {
+      send_redis_reply(z.store.socket, {"body":['# Server', 'redis_version:7.0.0', 'role:master', 'db0:keys=10,expires=0,avg_ttl=0']})
+    } else if(_.isMatch(z.store.msg, ['client', 'SETINFO', 'LIB-NAME', 'ioredis'])) {
+      send_redis_reply(z.store.socket, '+OK\r\n')
+    } else if(_.isMatch(z.store.msg, ['client', 'SETINFO', 'LIB-VER'])) {
+      // _.isMatch does partial matching so the above will match something like ['client', 'SETINFO', 'LIB-VER', '5.8.2']
+      send_redis_reply(z.store.socket, '+OK\r\n')
+    } else {
+      throw new Error(`Unexpected redis_msg ${z.store.msg}`)
+    }
 
-  await z.wait([
-    {
-      name: 'redis_msg',
-      server: name,
-      msg: ['client', 'SETINFO', 'LIB-VER', '!{_}'],
-      socket: m.collect('socket'),
-    },
-  ], 1000)
-
-  send_redis_reply(z.store.socket, '+OK\r\n')
+    delete z.store.msg
+    pending--
+  }
 }
 
 module.exports = {
