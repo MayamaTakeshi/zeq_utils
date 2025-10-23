@@ -83,8 +83,8 @@ async function test() {
     },
   ];
 
-  z.store.conn.writeTextResult(row, columns, false);
-  z.store.conn._resetSequenceId();
+  z.$conn.writeTextResult(row, columns, false);
+  z.$conn._resetSequenceId();
 
   await z.wait([
    {

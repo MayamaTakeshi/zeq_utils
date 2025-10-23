@@ -48,7 +48,7 @@ async function test() {
       },
     ], 2000)
 
-    zeq_utils.send_redis_reply(z.store.socket, {
+    zeq_utils.send_redis_reply(z.$socket, {
       body: ['myval'],
     })
 

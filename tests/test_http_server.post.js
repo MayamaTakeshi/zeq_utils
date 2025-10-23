@@ -61,8 +61,8 @@ async function test() {
       },
     ], 1000)
 
-    z.store.res.writeHead(200, { 'Content-Type': 'application/json' });
-    z.store.res.end(JSON.stringify(data));
+    z.$res.writeHead(200, { 'Content-Type': 'application/json' });
+    z.$res.end(JSON.stringify(data));
 
     await z.wait([
       {

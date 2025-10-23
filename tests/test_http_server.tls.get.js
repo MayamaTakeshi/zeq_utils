@@ -58,8 +58,8 @@ async function test() {
       },
     ], 1000)
 
-    z.store.res.writeHead(200, { 'Content-Type': 'text/plain' });
-    z.store.res.end('OK');
+    z.$res.writeHead(200, { 'Content-Type': 'text/plain' });
+    z.$res.end('OK');
 
     await z.wait([
       {

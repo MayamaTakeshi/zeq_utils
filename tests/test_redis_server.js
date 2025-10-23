@@ -34,7 +34,7 @@ async function test() {
       },
     ], 1000)
 
-    zeq_utils.send_redis_reply(z.store.socket, "+OK\r\n")
+    zeq_utils.send_redis_reply(z.$socket, "+OK\r\n")
 
     await z.wait([
       {
@@ -50,7 +50,7 @@ async function test() {
       },
     ], 1000)
 
-    zeq_utils.send_redis_reply(z.store.socket, "+OK\r\n")
+    zeq_utils.send_redis_reply(z.$socket, "+OK\r\n")
 
     await z.wait([
       {
@@ -63,7 +63,7 @@ async function test() {
       },
     ], 1000)
 
-    zeq_utils.send_redis_reply(z.store.socket, {"body":['# Server', 'redis_version:7.0.0', 'role:master', 'db0:keys=10,expires=0,avg_ttl=0']})
+    zeq_utils.send_redis_reply(z.$socket, {"body":['# Server', 'redis_version:7.0.0', 'role:master', 'db0:keys=10,expires=0,avg_ttl=0']})
 
     redis.get('mykey')
     .then(res => {
@@ -91,7 +91,7 @@ async function test() {
       },
     ], 2000)
 
-    zeq_utils.send_redis_reply(z.store.socket, {
+    zeq_utils.send_redis_reply(z.$socket, {
       body: ['myval'],
     })
 
