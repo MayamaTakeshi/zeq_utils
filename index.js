@@ -11,6 +11,9 @@ const net = require('net')
 const _ = require('lodash')
 const axios = require('axios')
 
+const smtpserver = require('smtp-server')
+const mailparser = require('mailparser')
+
 async function start_http_server(z, server_host, server_port, name, use_tls) {
     var options = {};
 
@@ -130,6 +133,46 @@ async function start_mysql_server(z, server_host, server_port, name) {
     return server;
 }
 
+async function start_smtp_server(z, server_host, server_port, name) {
+    return new Promise((resolve, reject) => {
+        const smtp_server = new smtpserver.SMTPServer({
+            authOptional: true,
+            onConnect(session, callback) {
+                return callback(); // Accept the connection
+            },
+            onData(stream, session, callback) {
+                stream.pipe(process.stdout); // print message to console
+                stream.on("end", callback);
+
+                mailparser.simpleParser(stream, {}, (err, parsed) => {
+                    if (err) {
+                        z.push_event({
+                            event: "smtp_err",
+                            server: name,
+                            error: err,
+                        });
+                    } else {
+                        z.push_event({
+                            event: "smtp_mail",
+                            server: name,
+                            mail: parsed,
+                        });
+                    }
+                });
+            },
+        });
+        smtp_server.listen(server_port, server_host);
+
+        smtp_server.server.once("error", (err) => {
+            reject(err);
+        });
+
+        smtp_server.server.once("listening", () => {
+            resolve(smtp_server);
+        });
+    });
+}
+
 async function start_redis_server(z, server_host, server_port, name) {
   return new Promise((resolve, reject) => {
     var s = net.createServer(socket => {
@@ -235,6 +278,7 @@ module.exports = {
   start_http_server,
   start_mysql_server,
   start_redis_server,
+  start_smtp_server,
 
   send_redis_reply,
   wait_ioredis_connection_initialization,
